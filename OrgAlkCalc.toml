@@ -1,0 +1,20 @@
+[project]
+name = "OrgAlkCalc"
+version = "0.0.1"
+authors = [
+  { name="Charles Turner", email="charlesturner0987@gmail.com" },
+  { name="Dan Kerr", email="dankerr30@gmail.com" },
+]
+description = "A package for automatically computing organic alkalinity"
+readme = "README.md"
+license = { file="LICENCE" }
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/pypa/sampleproject"
+"Bug Tracker" = "https://github.com/pypa/sampleproject/issues"
