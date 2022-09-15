@@ -15,6 +15,10 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project.urls]
-"Homepage" = "https://github.com/pypa/sampleproject"
-"Bug Tracker" = "https://github.com/pypa/sampleproject/issues"
+"Homepage" = "https://github.com/charles-turner-1/OrgAlkCalc"
+"Bug Tracker" = "https://github.com/charles-turner-1/OrgAlkCalc/issues"
