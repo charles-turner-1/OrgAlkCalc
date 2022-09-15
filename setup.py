@@ -6,12 +6,12 @@ setup(
   author_email='charlesturner0987@gmail.com',
   classifiers=[
     'License :: OSI Approved :: MIT License',
-    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3',
   ],
   install_requires=["numpy","pandas","scipy","lmfit" ,"matplotlib"
   ,"openpyxl"],
   description="This is the cleaned up organic-alkalinity-sausage-machine, now known more sensibly as OrgAlkCalc",
-  py_modules=["SausageMachine"],
+  py_modules=["OrgAlkCalc"],
   package_dir={'': 'src'},
   license="MIT license",
   include_package_data=True,
