@@ -5,6 +5,7 @@ with open("README.md","r") as fh:
   long_description = fh.read()
 
 setup(
+  url = "https://github.com/charles-turner-1/OrgAlkCalc",
   author="Charles Turner",
   author_email='charlesturner0987@gmail.com',
   classifiers=[
