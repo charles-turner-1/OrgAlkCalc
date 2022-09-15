@@ -8,8 +8,8 @@ setup(
     'License :: OSI Approved :: MIT License',
     'Programming Language :: Python :: 3.9',
   ],
-  install_requires=["numpy","pandas","os","warmings","scipy","lmfit"
-  ,"matplotlib","openpyxl"],
+  install_requires=["numpy","pandas","scipy","lmfit" ,"matplotlib"
+  ,"openpyxl"],
   description="This is the cleaned up organic-alkalinity-sausage-machine, now known more sensibly as OrgAlkCalc",
   py_modules=["SausageMachine"],
   package_dir={'': 'src'},
