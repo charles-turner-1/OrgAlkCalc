@@ -9,11 +9,6 @@ This file will comprise the main class used in the sausage machine to perform
 organic alkalinity calculations.
 """
 
-from asyncio import sslproto
-from doctest import master
-from logging import warning
-from multiprocessing.sharedctypes import Value
-from re import M
 import numpy as np
 import pandas as pd
 import shutil
@@ -25,7 +20,6 @@ from scipy.stats import linregress
 from lmfit import Minimizer, Parameters, report_fit
 from matplotlib.legend_handler import HandlerBase
 from openpyxl import load_workbook
-from IPython.display import Markdown, display
 
 
 class OrgAlkTitration():
@@ -938,11 +932,6 @@ class OrgAlkTitration():
                       handler_map={tuple:MarkerHandler()}) 
 
             plt.show()
-
-    def print_output_params(self):
-            # This function is called nowhere so it might be a complete waste of
-            # time
-            display(self.df_minimiser_outputs)
 
     def select_output_params(self,row_to_select=None,batch_mode=False):
         if row_to_select is not None and batch_mode is True:
