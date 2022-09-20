@@ -53,3 +53,8 @@ Each argument of the initialisation is now explained in turn:
 
 
 ### OrgAlkTitration
+
+`OrgAlkTitration` allows the user to take a master spreadsheet and automatically
+perform all organic alkalinity calculations for a titration contained in the 
+master spreadsheet of interest. It may be invoked as follows
+
