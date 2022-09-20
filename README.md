@@ -9,3 +9,26 @@ alkalinity calculations: `OrgAlkTitration` and `OrgAlkTitrationBatch`.
 to perform calculations with no additional input.
 - `OrgAlkTitration` is more granular, allowing the user to specify in detail how
 they wish the calculation to be performed. 
+
+### OrgAlkTitrationBatch
+
+`OrgAlkTitrationBatch` allows the user to take a master spreadsheet and 
+automatically perform all organic alkalinity calculations for all titrations 
+contained in the master spreadsheet of interest. It is invoked as follows
+
+`titr = OrgAlkCalc.OrgAlkTitrationBatch("~/Python/OrgAlkCalculations/"
+                                         ,"Master_Titration_file.xlsx"
+                                         ,"~/Python/OrgAlkCalculations/"
+                                         ,"Master_Results_File.xlsx")`
+
+This initialises the batch calculation object. It is then called using
+`titr.batch_calculate()`
+This will perform all calculations and write results to the master results file, 
+in this case `~/Python/OrgAlkCalculations/Master_ResultsFile.xlsx`.
+
+Alternatively, you may call `batch_calculate` with plotting enabled:
+`titr.batch_calculate(plot_results=True)`
+
+
+
+### OrgAlkTitration
