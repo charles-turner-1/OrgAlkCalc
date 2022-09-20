@@ -23,9 +23,17 @@ from openpyxl import load_workbook
 
 
 class OrgAlkTitration():
+    """
+    This class contains all the functionality necessary to perform an organic 
+    alkalinity titration. It should be invoked with a dataset path, and 
+    spreadsheet names for the TA titration, the NaOH titration, and the OA titration.
+
+    All other paramaters are set in the spreadsheets.
+    """
     def __init__(self,dataset_path=None,spreadsheet_name_TA = None
                                   ,spreadsheet_name_NaOH = None
                                   ,spreadsheet_name_OA = None):
+
         self.dataset_path = dataset_path
         self.spreadsheet_name_TA = spreadsheet_name_TA
         self.spreadsheet_name_NaOH = spreadsheet_name_NaOH
@@ -1008,10 +1016,51 @@ class OrgAlkTitration():
 
 
 class OrgAlkTitrationBatch():
+    """
+    This class contains all the functionality necessary to perform a complete organic 
+    alkalinity titration calculation. It should be invoked with a dataset path, and 
+    spreadsheet names for the TA titration, the NaOH titration, and the OA titration.
+
+    Parameters: 
+    -----------
+
+    master_spreadsheet_path : string
+        The absolute path of the master spreadsheet. This tells the program 
+        where to look for the master spreadsheet which informs the individual 
+        calculations.
+    master_spreadsheet_filename : string
+        The name of the master spreadsheet, eg. master_titration.xlsx 
+    master_results_path : string
+        This function will write results out to a master results file. As with
+        master_spreadsheet_path, this argument tells the toolbox which directory
+        to look for a master results file to write to.
+    master_results_filename : string
+        The name of the master results spreadsheet, eg. master_results.xlsx 
+
+
+    Methods: 
+    -----------
+
+    batch_calculate(SSR_frac_change_limit,plot_results)
+        This takes a master spreadsheet, and runs all the calculations, before 
+        outputting results to the master result spreadsheet.
+
+        It has two arguments:
+            SSR_frac_change_limit : float, default 1-e10
+            plot_results : bool, default false
+        
+        SSR_frac_change_limit governs the rate of convergence at which the 
+        minimiser will stop repeating. 
+
+        plot_results determines whether results will be plotted in addition to 
+        being written to a spreadsheet.
+    """
+    
     def __init__(self,master_spreadsheet_path=None
                 ,master_spreadsheet_filename=None
                 ,master_results_path=None
                 ,master_results_filename=None):
+
         self.master_spreadsheet_path=master_spreadsheet_path
         self.master_spreadsheet_filename=master_spreadsheet_filename
         self.master_results_path=master_results_path
