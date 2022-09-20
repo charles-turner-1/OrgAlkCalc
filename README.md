@@ -20,7 +20,7 @@ contained in the master spreadsheet of interest. It is invoked as follows
 
 A sample call is shown below:
 
-`titr = OrgAlkCalc.OrgAlkTitrationBatch("~/Python/OrgAlkCalculations/"
+`OrgAlkCalc.OrgAlkTitrationBatch("~/Python/OrgAlkCalculations/"
                                          ,"Master_Titration_file.xlsx"
                                          ,"~/Python/OrgAlkCalculations/"
                                          ,"Master_Results_File.xlsx")`
