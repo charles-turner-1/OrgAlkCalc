@@ -20,7 +20,7 @@ setup(
   license="MIT license",
   include_package_data=True,
   name='OrgAlkCalc',
-  version='0.1.0',
+  version='0.1.1',
   zip_safe=False,
   long_description=long_description,
   long_description_content_type="text/markdown",

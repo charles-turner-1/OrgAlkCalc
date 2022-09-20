@@ -1,6 +1,6 @@
 [project]
 name = "OrgAlkCalc"
-version = "0.0.1"
+version = "0.1.1"
 authors = [
   { name="Charles Turner", email="charlesturner0987@gmail.com" },
   { name="Dan Kerr", email="dankerr30@gmail.com" },
