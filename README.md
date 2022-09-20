@@ -63,6 +63,8 @@ master spreadsheet of interest. It may be invoked as follows:
 titration_name)` reads the master spreadsheet specified to find the titrations
 associated with `titration_name`.
 3. `titr.pipeline()` performs all necessary data processing before minimisation.
+For additional granular control, inspect `titr.pipeline()`: functions invoked by 
+it have additional parameters which may be altered by the user. 
 4. `titr.repeat_minimise(minimiser_no,SSR_frac_change_limit,plot_results)` performs
 the repeated minimisation in order to calculate output parameters. This must be 
 run in order (ie. run `minimiser_no = 1`, `= 2`, `=3`, `=4`).
@@ -71,4 +73,12 @@ will stop running.
 `plot_results` may be `true` or `false`: if `true`, once the repeated minimisation
 has reached its fractional change limit, the data points and calculated titration
 curve will be plotted.
-
+5. `titr.select_output_params(row_to_select)`: this selects which output parameters
+version we manually from `titr.df_minimiser_outputs` (this DataFrame can be 
+inspected manually by the user). Alternatively, we may call 
+`titr.select_output_params(batch_mode=True)`, in order to allow the minimiser to 
+automatically select the 'best' output parameters, based on automated reliability 
+checks.
+6. `titr.write_results(master_results_path,master_results_filename)`: this writes
+results to a master spreadsheet, specified by `master_results_path` and 
+`master_results_filename`.
