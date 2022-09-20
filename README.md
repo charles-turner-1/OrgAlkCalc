@@ -16,10 +16,10 @@ they wish the calculation to be performed.
 automatically perform all organic alkalinity calculations for all titrations 
 contained in the master spreadsheet of interest. It is invoked as follows
 
-`titr = OrgAlkCalc.OrgAlkTitrationBatch("~/Python/OrgAlkCalculations/"
-                                         ,"Master_Titration_file.xlsx"
-                                         ,"~/Python/OrgAlkCalculations/"
-                                         ,"Master_Results_File.xlsx")`
+`titr = OrgAlkCalc.OrgAlkTitrationBatch(master_spreadsheet_path,
+                                        master_spreadsheet_filename,
+                                        master_results_path,
+                                        master_results_filename)
 
 This initialises the batch calculation object. It is then called using
 `titr.batch_calculate()`
