@@ -58,12 +58,12 @@ Each argument of the initialisation is now explained in turn:
 perform all organic alkalinity calculations for a titration contained in the 
 master spreadsheet of interest. It may be invoked as follows:
 
-1 `titr = OrgAlkTitration()` initialises the `OrgAlkTitration` object.
-2 `titr.read_master_spreadsheet(master_speadsheet_path,master_speadsheet_filename,
+1. `titr = OrgAlkTitration()` initialises the `OrgAlkTitration` object.
+2. `titr.read_master_spreadsheet(master_speadsheet_path,master_speadsheet_filename,
 titration_name)` reads the master spreadsheet specified to find the titrations
 associated with `titration_name`.
-3 `titr.pipeline()` performs all necessary data processing before minimisation.
-4 `titr.repeat_minimise(minimiser_no,SSR_frac_change_limit,plot_results)` performs
+3. `titr.pipeline()` performs all necessary data processing before minimisation.
+4. `titr.repeat_minimise(minimiser_no,SSR_frac_change_limit,plot_results)` performs
 the repeated minimisation in order to calculate output parameters. This must be 
 run in order (ie. run `minimiser_no = 1`, `= 2`, `=3`, `=4`).
 `SSR_frac_change_limit` specifies the fractional change at which the minimiser 
