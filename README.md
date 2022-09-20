@@ -84,7 +84,7 @@ results to a master spreadsheet, specified by `master_results_path` and
 `master_results_filename`.
 
 
-## Bugs and Errors.
+## Bugs and Errors
 
 If you do find any bug, error, unexpected behavioural quirk or just anything 
 which seems odd, please do get in contact: this toolbox is still very much a work
