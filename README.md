@@ -33,6 +33,8 @@ in this case `~/Python/OrgAlkCalculations/Master_ResultsFile.xlsx`.
 
 Alternatively, you may call `batch_calculate` with plotting enabled:
 `titr.batch_calculate(plot_results=True)`
+This will perform all the same calculations, but additionally plot titration 
+curves measured and calculated results.
 
 Each argument of the initialisation is now explained in turn: 
 
