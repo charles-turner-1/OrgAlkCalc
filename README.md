@@ -31,18 +31,18 @@ Alternatively, you may call `batch_calculate` with plotting enabled:
 
 Each argument of the initialisation is now explained in turn: 
 
--  `master_spreadsheet_path` : string
-       The absolute path of the master spreadsheet. This tells the program 
+-  `master_spreadsheet_path`  (string)
+       - The absolute path of the master spreadsheet. This tells the program 
        where to look for the master spreadsheet which informs the individual 
        calculations.
--  `master_spreadsheet_filename` : string
-       The name of the master spreadsheet, eg. master_titration.xlsx 
--   `master_results_path` : string
-       This function will write results out to a master results file. As with
+-  `master_spreadsheet_filename` (string)
+       - The name of the master spreadsheet, eg. master_titration.xlsx 
+-   `master_results_path`  (string)
+       - This function will write results out to a master results file. As with
        master_spreadsheet_path, this argument tells the toolbox which directory
        to look for a master results file to write to.
--   `master_results_filename` : string
-        The name of the master results spreadsheet, eg. master_results.xlsx 
+-   `master_results_filename`  (string)
+       - The name of the master results spreadsheet, eg. master_results.xlsx 
 
 
 ### OrgAlkTitration
