@@ -25,10 +25,15 @@ from openpyxl import load_workbook
 class OrgAlkTitration():
     """
     This class contains all the functionality necessary to perform an organic 
-    alkalinity titration. It should be invoked with a dataset path, and 
-    spreadsheet names for the TA titration, the NaOH titration, and the OA titration.
+    alkalinity titration. It may be invoked with a dataset path, and spreadsheet
+    names for the TA titration, the NaOH titration, and the OA titration. 
 
-    All other paramaters are set in the spreadsheets.
+    Alternatively, it may be invoked with no parameters. Dataset paths and 
+    spreadsheets can be read from a master spreadsheet using the 
+    `read_master_spreadsheet()` function, or loaded manually using the 
+    `read_excel_spreadsheets()` function.
+
+    All other parameters are set in the spreadsheets.
     """
     def __init__(self,dataset_path=None,spreadsheet_name_TA = None
                                   ,spreadsheet_name_NaOH = None
