@@ -20,11 +20,11 @@ contained in the master spreadsheet of interest. It is invoked as follows
 
 A sample call is shown below:
 
-`OrgAlkCalc.OrgAlkTitrationBatch("~/Python/OrgAlkCalculations/","Master_Titration_file.xlsx"
+`titr = OrgAlkCalc.OrgAlkTitrationBatch("~/Python/OrgAlkCalculations/","Master_Titration_file.xlsx"
 ,"~/Python/OrgAlkCalculations/","Master_Results_File.xlsx")`
 
-This initialises the batch calculation object. This will load all data contained
-in `/Python/OrgAlkCalculations/Master_Titration_file.xlsx`
+This initialises the batch calculation object as `titr'. This will load all data 
+contained in `/Python/OrgAlkCalculations/Master_Titration_file.xlsx`
 
 It is then called using
 `titr.batch_calculate()`
