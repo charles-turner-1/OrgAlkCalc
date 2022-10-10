@@ -590,9 +590,9 @@ class OrgAlkTitration():
 
 
     def init_minimiser(self):
-        self.X1 = self.titration_features["OA"]["TA_processed"]
-        self.X2 = self.titration_features["OA"]["TA_processed"]
-        self.X3 = self.titration_features["OA"]["TA_processed"]
+        self.X1 = self.titration_features["OA"]["TA_processed"] - self.species_concentrations["CTNa"]
+        self.X2 = self.titration_features["OA"]["TA_processed"]  - self.species_concentrations["CTNa"]
+        self.X3 = self.titration_features["OA"]["TA_processed"]  - self.species_concentrations["CTNa"]
 
         self.K_X1 = self.equilibrium_constants["K_X1"]
         self.K_X2 = self.equilibrium_constants["K_X2"]
