@@ -114,7 +114,7 @@ class OrgAlkTitration():
             "pK2" : None,
             "pK3" : None,
             "CONVERGENCE_FACTOR" : None,
-            "SSR_FLAG" : 0,
+            "RMS_FLAG" : 0,
             "OUTPUT_RELIABILITY_FLAG" : 0,
             "pK1_INITIAL" : 4.5,
             "pK2_INITIAL" : 5.25,
@@ -430,7 +430,7 @@ class OrgAlkTitration():
 
         new_dataframe = dataframe[dataframe["GRAN_pH"].between(3, 3.5)]#SELECT ONLY TITRATION POINTS WHICH pH ARE BETWEEN 3.0 - 3.5 
 
-        # DEFINE FUNCTION WHICH RETURNS VALUE(S) TO BE MINIMISED, IN THIS CASE SSR 
+        # DEFINE FUNCTION WHICH RETURNS VALUE(S) TO BE MINIMISED, IN THIS CASE RMS 
         x = new_dataframe["H"]
         data = new_dataframe["m"]
 
@@ -598,7 +598,7 @@ class OrgAlkTitration():
         self.K_X2 = self.equilibrium_constants["K_X2"]
         self.K_X3 = self.equilibrium_constants["K_X3"]
 
-        minimiser_output_params = {'SSR' : None, 'X1' : None, 'X2' : None
+        minimiser_output_params = {'RMS' : None, 'X1' : None, 'X2' : None
                       ,'X3' : None ,'pK1' : None, 'pK2' : None, 'pK3' : None
                       ,'CONVERGENCE_FACTOR' : None}
 
@@ -663,7 +663,7 @@ class OrgAlkTitration():
         # Check that X1+X2+X3 are sensible (NB if pK[i] is dodgy X[i] is probably dodgy)
 
         # We also need to rewrite this in order to not necessarily write this to 
-        # only write the parameters if SSR decreases: or do we?
+        # only write the parameters if RMS decreases: or do we?
 
 
     def minimise(self,minimiser_no):
@@ -813,7 +813,7 @@ class OrgAlkTitration():
                                       + CTNa/((cleaned_dataframe["H"]/ dataframe["K1"])+(dataframe["K2"]/cleaned_dataframe["H"])+1)
                                       - cleaned_dataframe["H"] + cleaned_dataframe["OH"] + self.C_NaOH)) )
                                      
-            SSR = np.sum((cleaned_dataframe['m']-cleaned_dataframe["m_calc_001"])**2)
+            RMS = np.mean((cleaned_dataframe['m']-cleaned_dataframe["m_calc_001"])**2)
         elif minimiser_no == 2:
             cleaned_dataframe["m_calc_002"] = ( -((self.V0*(cleaned_dataframe["H"]-cleaned_dataframe["OH"]) 
                                       - self.H0*(self.V0+self.Va)
@@ -827,7 +827,7 @@ class OrgAlkTitration():
                                       + CTNa/((cleaned_dataframe["H"]/ dataframe["K1"])+(dataframe["K2"]/cleaned_dataframe["H"])+1)
                                       - cleaned_dataframe["H"] + cleaned_dataframe["OH"] + self.C_NaOH)) )
                                      
-            SSR = np.sum((cleaned_dataframe['m']-cleaned_dataframe["m_calc_002"])**2)
+            RMS = np.mean((cleaned_dataframe['m']-cleaned_dataframe["m_calc_002"])**2)
         elif minimiser_no == 3:
             cleaned_dataframe["m_calc_003"] = ( -((self.V0*(cleaned_dataframe["H"]-cleaned_dataframe["OH"]) 
                                       - self.H0*(self.V0+self.Va)
@@ -842,7 +842,7 @@ class OrgAlkTitration():
                                       + CTNa/((cleaned_dataframe["H"]/ dataframe["K1"])+(dataframe["K2"]/cleaned_dataframe["H"])+1)
                                       - cleaned_dataframe["H"] + cleaned_dataframe["OH"] + self.C_NaOH)) )
                                      
-            SSR = np.sum((cleaned_dataframe['m']-cleaned_dataframe["m_calc_003"])**2)
+            RMS = np.mean((cleaned_dataframe['m']-cleaned_dataframe["m_calc_003"])**2)
         elif minimiser_no == 4:
             cleaned_dataframe["m_calc_004"] = ( -((self.V0*(cleaned_dataframe["H"]-cleaned_dataframe["OH"]) 
                                       - self.H0*(self.V0+self.Va)
@@ -856,52 +856,52 @@ class OrgAlkTitration():
                                       / ((2*CTNa)/((cleaned_dataframe["H"]**2/( dataframe["K1"]* dataframe["K2"]))+(cleaned_dataframe["H"]/dataframe["K2"])+1)
                                       + CTNa/((cleaned_dataframe["H"]/ dataframe["K1"])+(dataframe["K2"]/cleaned_dataframe["H"])+1)
                                       - cleaned_dataframe["H"] + cleaned_dataframe["OH"] + self.C_NaOH)) )
-            SSR = np.sum((cleaned_dataframe['m']-cleaned_dataframe["m_calc_004"])**2)
-        return SSR 
+            RMS = np.mean((cleaned_dataframe['m']-cleaned_dataframe["m_calc_004"])**2)
+        return RMS 
 
-    def repeat_minimise(self,minimiser_no,SSR_frac_change_limit=1e-10,plot_results=True):
+    def repeat_minimise(self,minimiser_no,RMS_frac_change_limit=1e-10,plot_results=True):
         # Rewrite this so that it starts at 1e-10 and will repeatedly reduce the
         # fractional change limit up to 1e-3, then flag a warning instead of 
         # raising an error, write a warning flag out to the master spreadsheet 
         # file
-        class UnreliableSSRValue(UserWarning):
+        class UnreliableRMSValue(UserWarning):
             pass
 
         self.minimise(minimiser_no)
-        SSR_init = self.ssr(minimiser_no)
-        SSR_frac_change = 1
+        RMS_init = self.ssr(minimiser_no)
+        RMS_frac_change = 1
         num_reps = 0
-        while SSR_frac_change > SSR_frac_change_limit:
+        while RMS_frac_change > RMS_frac_change_limit:
             if num_reps > 100:
-                warnings.warn(f"Minimiser convergence not converging at SSR_frac_change_limit = {SSR_frac_change_limit}, increasing to {10*SSR_frac_change_limit}",IncreasingSSRFracChangeLim)
-                SSR_frac_change_limit *= 10
+                warnings.warn(f"Minimiser convergence not converging at RMS_frac_change_limit = {RMS_frac_change_limit}, increasing to {10*RMS_frac_change_limit}",IncreasingRMSFracChangeLim)
+                RMS_frac_change_limit *= 10
                 num_reps = 0
             self.minimise(minimiser_no)
-            SSR = self.ssr(minimiser_no)
-            SSR_frac_change = (((SSR  - SSR_init)/ SSR_init)**2)**0.5
-            SSR_init = SSR
+            RMS = self.ssr(minimiser_no)
+            RMS_frac_change = (((RMS  - RMS_init)/ RMS_init)**2)**0.5
+            RMS_init = RMS
             num_reps += 1
-        print(f"Minimisation repeated {num_reps} times in order to reach fractional change of {SSR_frac_change_limit} in SSR")
-        print(f"Final SSR value = {SSR:.5f}")
+        print(f"Minimisation repeated {num_reps} times in order to reach fractional change of {RMS_frac_change_limit} in RMS")
+        print(f"Final RMS value = {RMS:.5f}")
 
-        if 0.005 < SSR < 0.01:
-            warnings.warn(f"SSR value = {SSR_frac_change_limit}, flagging results as suspect (value 1)",UnreliableSSRValue)
-            self.outputs["SSR_FLAG"] = 1
-        elif SSR >= 0.01:
-            warnings.warn(f"SSR value = {SSR_frac_change_limit}, flagging results as unreliable (value 2)",UnreliableSSRValue)
-            self.outputs["SSR_FLAG"] = 2
+        if 0.005 < RMS < 0.01:
+            warnings.warn(f"RMS value = {RMS_frac_change_limit}, flagging results as suspect (value 1)",UnreliableRMSValue)
+            self.outputs["RMS_FLAG"] = 1
+        elif RMS >= 0.01:
+            warnings.warn(f"RMS value = {RMS_frac_change_limit}, flagging results as unreliable (value 2)",UnreliableRMSValue)
+            self.outputs["RMS_FLAG"] = 2
 
 
 
-        self.df_minimiser_outputs["SSR"][minimiser_no] = SSR
+        self.df_minimiser_outputs["RMS"][minimiser_no] = RMS
         self.df_minimiser_outputs["X1"][minimiser_no] = self.X1 * 1e6
         self.df_minimiser_outputs["X2"][minimiser_no] = self.X2 * 1e6
         self.df_minimiser_outputs["X3"][minimiser_no] = self.X3 * 1e6
         self.df_minimiser_outputs["pK1"][minimiser_no] = -np.log10(self.K_X1)
         self.df_minimiser_outputs["pK2"][minimiser_no] = -np.log10(self.K_X2)
         self.df_minimiser_outputs["pK3"][minimiser_no] = -np.log10(self.K_X3)
-        self.df_minimiser_outputs["CONVERGENCE_FACTOR"][minimiser_no] = SSR_frac_change_limit
-        self.outputs["CONVERGENCE_FACTOR"] = SSR_frac_change_limit
+        self.df_minimiser_outputs["CONVERGENCE_FACTOR"][minimiser_no] = RMS_frac_change_limit
+        self.outputs["CONVERGENCE_FACTOR"] = RMS_frac_change_limit
 
 
         if minimiser_no == 1:
@@ -935,7 +935,7 @@ class OrgAlkTitration():
             ax = plt.gca()
             ax.tick_params(bottom='on', left='on', labelleft='on', labelbottom='on', length=5, labelsize = 10.5)
             plt.rc('axes',edgecolor='black')
-            plt.annotate(f"SSR: {SSR:.5f}", xy=(0.0650, 0.75), xycoords='axes fraction')
+            plt.annotate(f"RMS: {RMS:.5f}", xy=(0.0650, 0.75), xycoords='axes fraction')
 
             list_color  = ["black","red",]
             list_mak    = ["1",       "_"]
@@ -975,7 +975,7 @@ class OrgAlkTitration():
 
         self.outputs["Initial_pH_TA"] = self.titration_features["TA"]["Initial_pH_TA"]
 
-        if row_to_select < 2 or self.outputs["SSR_FLAG"] > 0:
+        if row_to_select < 2 or self.outputs["RMS_FLAG"] > 0:
             self.outputs["OUTPUT_RELIABILITY_FLAG"] = 1
 
     def init_results_spreadsheet(self,master_results_path,master_results_filename):
@@ -1046,15 +1046,15 @@ class OrgAlkTitrationBatch():
     Methods: 
     -----------
 
-    batch_calculate(SSR_frac_change_limit,plot_results)
+    batch_calculate(RMS_frac_change_limit,plot_results)
         This takes a master spreadsheet, and runs all the calculations, before 
         outputting results to the master result spreadsheet.
 
         It has two arguments:
-            SSR_frac_change_limit : float, default 1-e10
+            RMS_frac_change_limit : float, default 1-e10
             plot_results : bool, default false
         
-        SSR_frac_change_limit governs the rate of convergence at which the 
+        RMS_frac_change_limit governs the rate of convergence at which the 
         minimiser will stop repeating. 
 
         plot_results determines whether results will be plotted in addition to 
@@ -1078,12 +1078,12 @@ class OrgAlkTitrationBatch():
         # We need to check that we can find all the files listed in master spreadsheet
         # at this point.
 
-    def batch_calculate(self,SSR_frac_change_limit=1e-10,plot_results=False):
+    def batch_calculate(self,RMS_frac_change_limit=1e-10,plot_results=False):
         # This is going to be the function which takes a master spreadsheet and 
         # outputs everything we could possibly want back to an output spreadsheet.
 
-        if type(SSR_frac_change_limit) is not float:
-            raise TypeError("SSR_frac_change_limit must be a float")
+        if type(RMS_frac_change_limit) is not float:
+            raise TypeError("RMS_frac_change_limit must be a float")
 
         for titration_name in self.titrations:
             print("Running titration " + titration_name)
@@ -1093,7 +1093,7 @@ class OrgAlkTitrationBatch():
                                              ,titration_name) 
             titration.pipeline()
             for i in np.arange(1,5):
-                titration.repeat_minimise(minimiser_no=i,SSR_frac_change_limit=SSR_frac_change_limit,plot_results=plot_results)
+                titration.repeat_minimise(minimiser_no=i,RMS_frac_change_limit=RMS_frac_change_limit,plot_results=plot_results)
             titration.select_output_params(batch_mode=True)
             # The following line is overwriting instead of appending. This is the
             # behaviour which needs sorting
