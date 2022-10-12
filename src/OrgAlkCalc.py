@@ -43,6 +43,7 @@ class OrgAlkTitration():
         self.spreadsheet_name_TA = spreadsheet_name_TA
         self.spreadsheet_name_NaOH = spreadsheet_name_NaOH
         self.spreadsheet_name_OA = spreadsheet_name_OA
+        self.master_spreadsheet_used = False
         self.S_TA = None
         self.V0 = None
         self.df_TA = None
@@ -952,8 +953,8 @@ class OrgAlkTitration():
         if batch_mode is False:
             output_params = self.df_minimiser_outputs.iloc[row_to_select-1] # For some reason 1 based indexing not working in selection
         else:
-            output_params = self.df_minimiser_outputs.dropna().iloc[-1]
-            row_to_select = self.df_minimiser_outputs.dropna().shape[0]
+            row_to_select = np.argmin(np.asarray(self.df_minimiser_outputs["RMS"]))
+            output_params = self.df_minimiser_outputs.iloc[row_to_select]
 
         if row_to_select < 4:
             output_params["X3"] = output_params["pK3"] = None
@@ -1066,10 +1067,10 @@ class OrgAlkTitrationBatch():
                 ,master_results_path=None
                 ,master_results_filename=None):
 
-        self.master_spreadsheet_path=master_spreadsheet_path
-        self.master_spreadsheet_filename=master_spreadsheet_filename
-        self.master_results_path=master_results_path
-        self.master_results_filename=master_results_filename
+        self.master_spreadsheet_path     = os.path.expanduser(master_spreadsheet_path)
+        self.master_spreadsheet_filename = os.path.expanduser(master_spreadsheet_filename)
+        self.master_results_path         = os.path.expanduser(master_results_path)
+        self.master_results_filename     = os.path.expanduser(master_results_filename)
 
         MS_filename_full = os.path.join(self.master_spreadsheet_path
                                        ,self.master_spreadsheet_filename)
