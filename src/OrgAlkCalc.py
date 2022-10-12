@@ -931,14 +931,16 @@ class OrgAlkTitration():
             y_meas = dataframe["pH"]
             y_calc = dataframe["pH"]
 
-            for i in range(1,2):
+            fig = plt.figure()
+
+            for i in range(1,3):
                 plt.subplot(1,2,i)
                 rem_calc = True if i == 2 else False
                 plt.xlabel('NaOH (g)', fontsize=18)
-                plt.ylabel('pH', fontsize=18)
-                graph = plt.scatter(x_meas, y_meas - y_calc * rem_calc, c = 'black', marker = "1")
+                graph = plt.scatter(x_meas, y_meas - y_calc * rem_calc, c = 'black' if rem_calc else 'red', marker = "1")
                 if rem_calc is False:
                     graph = plt.plot(x_calc, y_calc, c = 'black')
+                    plt.ylabel('pH', fontsize=18)
                 else:
                     plt.axhline(0, color='black',  linestyle='dashed', linewidth=0.85,dashes=(5, 5)) # 0
                 plt.grid(False)
