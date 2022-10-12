@@ -931,33 +931,47 @@ class OrgAlkTitration():
             y_meas = dataframe["pH"]
             y_calc = dataframe["pH"]
 
-            fig = plt.figure()
+            fig = plt.figure(figsize=(12,5))
 
-            for i in range(1,3):
-                plt.subplot(1,2,i)
-                rem_calc = True if i == 2 else False
-                plt.xlabel('NaOH (g)', fontsize=18)
-                graph = plt.scatter(x_meas, y_meas - y_calc * rem_calc, c = 'black' if rem_calc else 'red', marker = "1")
-                if rem_calc is False:
-                    graph = plt.plot(x_calc, y_calc, c = 'black')
-                    plt.ylabel('pH', fontsize=18)
-                else:
-                    plt.axhline(0, color='black',  linestyle='dashed', linewidth=0.85,dashes=(5, 5)) # 0
-                plt.grid(False)
-                ax = plt.gca()
-                ax.tick_params(bottom='on', left='on', labelleft='on', labelbottom='on', length=5, labelsize = 10.5)
-                plt.rc('axes',edgecolor='black')
-                if rem_calc is True:
-                    plt.annotate(f"RMS: {RMS:.5f}", xy=(0.0650, 0.75), xycoords='axes fraction')
+            plt.subplot(1,2,1)
+            
+            x_meas = dataframe["m"]
+            x_calc = dataframe[m_calc_labels[minimiser_no-1]]
+            y_meas = dataframe["pH"]
+            y_calc = dataframe["pH"]
 
-                list_color  = ["black","red",]
-                list_mak    = ["1",       "_"]
-                list_lab    = ['Measured','Calculated',]
+            plt.xlabel('NaOH (g)', fontsize=18)
+            plt.ylabel('pH$_{SWS}$', fontsize=18)
+            graph = plt.scatter(x_meas, y_meas, c = 'black', marker = "1")
+            graph = plt.plot(x_calc, y_calc, c = 'red', linewidth=0.85, alpha = 0.75)
+            plt.grid(False)
+            ax = plt.gca()
+            ax.tick_params(bottom='on', left='on', labelleft='on', labelbottom='on', length=5, labelsize = 10.5)
+            plt.rc('axes',edgecolor='black')
+            plt.annotate(f"RMS: {RMS:.5f}", xy=(0.0650, 0.75), xycoords='axes fraction')
 
-                ax.legend(list(zip(list_color,list_mak)), list_lab, 
-                          handler_map={tuple:MarkerHandler()}) 
+            list_color  = ["black","red",]
+            list_mak    = ["1",       "_"]
+            list_lab    = ['Measured','Calculated',]
 
+            ax.legend(list(zip(list_color,list_mak)), list_lab, 
+                      handler_map={tuple:MarkerHandler()}) 
 
+            plt.subplot(1,2,2)
+
+            x_res = x_meas - x_calc
+
+            plt.ylabel('$\Delta$ NaOH (g)', fontsize=18)
+            plt.xlabel('pH$_{SWS}$', fontsize=18)
+            graph = plt.scatter(y_meas, x_res, c = 'black', marker = "x")
+            plt.axhline(0, color='black',  linestyle='dashed', linewidth=0.85,dashes=(5, 5)) 
+
+            plt.grid(False)
+            ax = plt.gca()
+            ax.tick_params(bottom='on', left='on', labelleft='on', labelbottom='on', length=5, labelsize = 10.5)
+            plt.rc('axes',edgecolor='black')
+
+            plt.tight_layout(pad=4.0)
             plt.show()
 
     def select_output_params(self,row_to_select=None,batch_mode=False):
