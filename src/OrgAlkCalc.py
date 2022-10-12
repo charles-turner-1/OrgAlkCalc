@@ -1019,7 +1019,7 @@ class OrgAlkTitration():
         self.df_outputs= pd.read_excel(output_filename)
 
 
-        if sample_filename in self.df_outputs['SAMPLE'].to_list():
+        if sample_filename in self.df_outputs['SAMPLE'].tolist():
             raise KeyError("""You are trying to write to a sample name which is already present in the master results file. Exiting to avoid potentially overwriting previous results.""")
         else:
             self.outputs["SAMPLE"] = sample_filename
