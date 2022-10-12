@@ -867,6 +867,8 @@ class OrgAlkTitration():
         # file
         class UnreliableRMSValue(UserWarning):
             pass
+        class IncreasingRMSFracChangeLim(UserWarning):
+            pass
 
         self.minimise(minimiser_no)
         RMS_init = self.ssr(minimiser_no)
