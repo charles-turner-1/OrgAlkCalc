@@ -21,6 +21,7 @@ from lmfit import Minimizer, Parameters, report_fit
 from matplotlib.legend_handler import HandlerBase
 from openpyxl import load_workbook
 
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__)) # This is your Project Root
 
 class OrgAlkTitration():
     """
@@ -996,7 +997,7 @@ class OrgAlkTitration():
         output_filename = os.path.join(master_results_path,master_results_filename)
         master_results_exists = os.path.exists(output_filename)
 
-        template_results_filename = os.path.join(ROOT_DIR,"src/template_spreadsheets/master_results_template.xlsx")
+        template_results_filename = os.path.join(ROOT_DIR,"template_spreadsheets/master_results_template.xlsx")
 
         if not master_results_exists:
             print("Master Results Spreadsheet does not exist, copying from template")
