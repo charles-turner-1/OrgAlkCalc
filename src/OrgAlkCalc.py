@@ -46,7 +46,7 @@ class OrgAlkTitration():
         self.spreadsheet_name_OA = spreadsheet_name_OA
         self.master_spreadsheet_used = False
         self.S_TA = None
-        self.V0 = None
+        self.M0 = None
         self.df_TA = None
         self.df_NaOH = None
         self.df_OA = None
@@ -168,7 +168,7 @@ class OrgAlkTitration():
 
         self.dataset_path = DF_MASTER['FILE_PATH'][TIT_IDX].item()
         self.outputs["SALINITY"] = self.S_TA = DF_MASTER['SALINITY'][TIT_IDX].item()
-        self.V0 = DF_MASTER['g_0'][TIT_IDX].item() - DF_MASTER['g_1'][TIT_IDX].item()
+        self.M0 = DF_MASTER['g_0'][TIT_IDX].item() - DF_MASTER['g_1'][TIT_IDX].item()
 
         self.titration_features["NaOH"]["slope_rho"] = DF_MASTER['slope_NaOH'][TIT_IDX].item()
         self.titration_features["NaOH"]["intercept_rho"] = DF_MASTER['intercept_NaOH'][TIT_IDX].item()
@@ -250,8 +250,8 @@ class OrgAlkTitration():
         # different titration classes can be all used as the same function.
 
         df_TA = self.df_TA
-        if self.V0 is None:
-            self.V0 = df_TA.iloc[g_start_idx]['g_0']-df_TA.iloc[g_start_idx]['g_1'] # Sample mass (g)
+        if self.M0 is None:
+            self.M0 = df_TA.iloc[g_start_idx]['g_0']-df_TA.iloc[g_start_idx]['g_1'] # Sample mass (g)
         if self.S_TA is None:
             self.S_TA = df_TA.iloc[g_start_idx]['SALINITY']  # Sample Salinity 
         self.titration_features["TA"]["data_start"] = int(df_TA.iloc[g_start_idx]['data_start']-1) #row which titration starts, eg after initial acid addition and degassing
@@ -273,9 +273,9 @@ class OrgAlkTitration():
         df_TA = self.df_TA
         df_NaOH = self.df_NaOH
 
-        self.Va = df_TA['m'][df_TA.index[-1]] #DEFINE TOTAL MASS OF ACID ADDED DURING FIRST (TA) TITRATION
-        self.Vb = df_NaOH['m'][df_NaOH.index[-1]] #DEFINE TOTAL MASS OF BASE ADDED DURING NAOH TITRATION
-        self.V0_OA = (self.V0+self.Va+self.Vb) # Sample mass accounting for additions of acid and base (g) 
+        self.Ma = df_TA['m'][df_TA.index[-1]] #DEFINE TOTAL MASS OF ACID ADDED DURING FIRST (TA) TITRATION
+        self.Mb = df_NaOH['m'][df_NaOH.index[-1]] #DEFINE TOTAL MASS OF BASE ADDED DURING NAOH TITRATION
+        self.M0_OA = (self.M0+self.Ma+self.Mb) # Sample mass accounting for additions of acid and base (g) 
         self.titration_features["OA"]["data_start"]= int(self.df_OA.iloc[start_idx]['data_start']-1) #row which titration starts, eg after initial acid addition and degassing
 
     def strip_data(self,titration_label,start_idx=0):
@@ -321,9 +321,9 @@ class OrgAlkTitration():
 
         self.titration_features[titration_label]["mass_known"] = True
         if titration_label == "TA":
-            self.Va = dataframe['m'][dataframe.index[-1]]
+            self.Ma = dataframe['m'][dataframe.index[-1]]
         elif titration_label == "NaOH":
-            self.Vb = dataframe['m'][dataframe.index[-1]]
+            self.Mb = dataframe['m'][dataframe.index[-1]]
 
         self.write_dataframe(dataframe,titration_label)
 
@@ -351,11 +351,11 @@ class OrgAlkTitration():
         S = self.S_TA if titration_label == "TA" else df2['S'][df2.index[-1]]
 
         if titration_label == "TA":
-            V0 = self.V0
+            V0 = self.M0
         elif titration_label == "NaOH":
-            V0 = self.V0 + self.Va 
+            V0 = self.M0 + self.Ma 
         elif titration_label == "OA":
-            V0 = self.V0_OA
+            V0 = self.M0_OA
 
         ImO = (19.924*S/(1000-1.005*S))
 
@@ -395,9 +395,9 @@ class OrgAlkTitration():
 
         dataframe = self.read_dataframe(titration_label)
         if titration_label == "TA":
-            V0 = self.V0
+            V0 = self.M0
         elif titration_label == "OA":
-            V0 = self.V0_OA
+            V0 = self.M0_OA
         else:
             raise ValueError("Dataframe label not recognised")
 
@@ -424,9 +424,9 @@ class OrgAlkTitration():
         E0_init_est = self.titration_features[titration_label]["E0_init_est"]
         TA_est = self.titration_features[titration_label]["TA_est"]
         if titration_label == "TA":
-            V0 = self.V0
+            V0 = self.M0
         elif titration_label == "OA":
-            V0 = self.V0_OA
+            V0 = self.M0_OA
         else:
             raise ValueError("Dataframe label not recognised")
 
@@ -576,7 +576,7 @@ class OrgAlkTitration():
                           *np.log(dataframe["T"])+ (0.053105*dataframe["S"]**0.5)*dataframe["T"] )
 
         self.species_concentrations['BT'] = inc_Boron * 0.0004157*self.S_TA/35 #TOTAL BORON [BT], (LEE2010) S VALUE IS ORIGINAL SAMPLE S
-        self.species_concentrations['CTNa'] *= (inc_CTNa * self.Vb)* 1e-6 
+        self.species_concentrations['CTNa'] *= (inc_CTNa * self.Mb)* 1e-6 
         # Since Boron and CO2 are both false by default, I'm pretty sure that this should make sure they don't contribute 
         # unless specified.
 
@@ -704,15 +704,15 @@ class OrgAlkTitration():
                 X1 = params['X1']
                 K_X1 = params['K_X1']
 
-                model = ((self.V0 + self.Va+ dataframe["m"])*(dataframe["H"]-dataframe["OH"])
-                        -((self.V0+self.Va)*H0)
+                model = ((self.M0 + self.Ma+ dataframe["m"])*(dataframe["H"]-dataframe["OH"])
+                        -((self.M0+self.Ma)*H0)
                         +(dataframe["m"]*C_NaOH)
-                        - self.V0 *(BT / (1 + dataframe["H"] / dataframe["KB"])) # optional, but used for all real seawater samples. BT and KB calculated.
-                        - self.V0 * (PT / (1 + dataframe["H"] / dataframe["KP2"]))  # optional, used if PT is above a certain value. PT user supplied, KP2 calculated
-                        - self.V0 * (SiT / (1 + dataframe["H"] / dataframe["KSi"])) # optional, used if SiT is above a certain value. SiT user supplied, KSi calculated
-                        - (self.Vb * CTNa) / (1+(dataframe["H"]/dataframe["K1"])+(dataframe["K2"]/dataframe["H"]))
-                        - (2 * self.Vb * CTNa) / (1 + (dataframe["H"]**2 / (dataframe["K1"] * dataframe["K2"])) + (dataframe["H"] / dataframe["K2"])) #K1c and K2c chosen by the user
-                        - (self.V0)*(X1/(1+dataframe["H"]/K_X1)))
+                        - self.M0 *(BT / (1 + dataframe["H"] / dataframe["KB"])) # optional, but used for all real seawater samples. BT and KB calculated.
+                        - self.M0 * (PT / (1 + dataframe["H"] / dataframe["KP2"]))  # optional, used if PT is above a certain value. PT user supplied, KP2 calculated
+                        - self.M0 * (SiT / (1 + dataframe["H"] / dataframe["KSi"])) # optional, used if SiT is above a certain value. SiT user supplied, KSi calculated
+                        - (self.Mb * CTNa) / (1+(dataframe["H"]/dataframe["K1"])+(dataframe["K2"]/dataframe["H"]))
+                        - (2 * self.Mb * CTNa) / (1 + (dataframe["H"]**2 / (dataframe["K1"] * dataframe["K2"])) + (dataframe["H"] / dataframe["K2"])) #K1c and K2c chosen by the user
+                        - (self.M0)*(X1/(1+dataframe["H"]/K_X1)))
                 return model - data
 
         elif minimiser_no == 2:
@@ -724,16 +724,16 @@ class OrgAlkTitration():
                 X2 = params['X2']
                 K_X2 = params['K_X2']
 
-                model = ((self.V0 + self.Va+ dataframe["m"])*(dataframe["H"]-dataframe["OH"]) 
-                        -((self.V0+self.Va)*H0)
+                model = ((self.M0 + self.Ma+ dataframe["m"])*(dataframe["H"]-dataframe["OH"]) 
+                        -((self.M0+self.Ma)*H0)
                         +(dataframe["m"]*C_NaOH) 
-                        - self.V0 *(BT / (1 + dataframe["H"] / dataframe["KB"])) # optional, but used for all real seawater samples. BT and KB calculated 
-                        - self.V0 * (PT / (1 + dataframe["H"] / dataframe["KP2"]))  # optional, used if PT is above a certain value. PT user supplied, KP2 calculated 
-                        - self.V0 * (SiT / (1 + dataframe["H"] / dataframe["KSi"])) # optional, used if SiT is above a certain value. SiT user supplied, KSi calculated 
-                        - (self.Vb * CTNa) / (1 + (dataframe["H"] / dataframe["K1"]) + (dataframe["K2"] / dataframe["H"])) #K1c and K2c are carbonate system dissociation constants 
-                        - (2 * self.Vb * CTNa) / (1 + (dataframe["H"]**2 / (dataframe["K1"] * dataframe["K2"])) + (dataframe["H"] / dataframe["K2"])) #K1c and K2c chosen by the user 
-                        - (self.V0)*(X1/(1+dataframe["H"]/K_X1))
-                        - (self.V0)*(X2/(1+dataframe["H"]/K_X2)))
+                        - self.M0 *(BT / (1 + dataframe["H"] / dataframe["KB"])) # optional, but used for all real seawater samples. BT and KB calculated 
+                        - self.M0 * (PT / (1 + dataframe["H"] / dataframe["KP2"]))  # optional, used if PT is above a certain value. PT user supplied, KP2 calculated 
+                        - self.M0 * (SiT / (1 + dataframe["H"] / dataframe["KSi"])) # optional, used if SiT is above a certain value. SiT user supplied, KSi calculated 
+                        - (self.Mb * CTNa) / (1 + (dataframe["H"] / dataframe["K1"]) + (dataframe["K2"] / dataframe["H"])) #K1c and K2c are carbonate system dissociation constants 
+                        - (2 * self.Mb * CTNa) / (1 + (dataframe["H"]**2 / (dataframe["K1"] * dataframe["K2"])) + (dataframe["H"] / dataframe["K2"])) #K1c and K2c chosen by the user 
+                        - (self.M0)*(X1/(1+dataframe["H"]/K_X1))
+                        - (self.M0)*(X2/(1+dataframe["H"]/K_X2)))
                 return model - data
 
         elif minimiser_no == 3:
@@ -747,17 +747,17 @@ class OrgAlkTitration():
                 X3 = params['X3']
                 K_X3 = params['K_X3']
 
-                model = ((self.V0 + self.Va+ dataframe["m"])*(dataframe["H"]-dataframe["OH"]) 
-                        -((self.V0+self.Va)*H0)
+                model = ((self.M0 + self.Ma+ dataframe["m"])*(dataframe["H"]-dataframe["OH"]) 
+                        -((self.M0+self.Ma)*H0)
                         +(dataframe["m"]*C_NaOH) 
-                        - self.V0 *(BT / (1 + dataframe["H"] / dataframe["KB"])) # optional, but used for all real seawater samples. BT and KB calculated 
-                        - self.V0 * (PT / (1 + dataframe["H"] / dataframe["KP2"]))  # optional, used if PT is above a certain value. PT user supplied, KP2 calculated 
-                        - self.V0 * (SiT / (1 + dataframe["H"] / dataframe["KSi"])) # optional, used if SiT is above a certain value. SiT user supplied, KSi calculated 
-                        - (self.Vb * CTNa) / (1 + (dataframe["H"] / dataframe["K1"]) + (dataframe["K2"] / dataframe["H"])) #K1c and K2c are carbonate system dissociation constants 
-                        - (2 * self.Vb * CTNa) / (1 + (dataframe["H"]**2 / (dataframe["K1"] * dataframe["K2"])) + (dataframe["H"] / dataframe["K2"])) #K1c and K2c chosen by the user 
-                        - (self.V0)*(X1/(1+dataframe["H"]/K_X1))
-                        - (self.V0)*(X2/(1+dataframe["H"]/K_X2))
-                        - (self.V0)*(X3/(1+dataframe["H"]/K_X3)))
+                        - self.M0 *(BT / (1 + dataframe["H"] / dataframe["KB"])) # optional, but used for all real seawater samples. BT and KB calculated 
+                        - self.M0 * (PT / (1 + dataframe["H"] / dataframe["KP2"]))  # optional, used if PT is above a certain value. PT user supplied, KP2 calculated 
+                        - self.M0 * (SiT / (1 + dataframe["H"] / dataframe["KSi"])) # optional, used if SiT is above a certain value. SiT user supplied, KSi calculated 
+                        - (self.Mb * CTNa) / (1 + (dataframe["H"] / dataframe["K1"]) + (dataframe["K2"] / dataframe["H"])) #K1c and K2c are carbonate system dissociation constants 
+                        - (2 * self.Mb * CTNa) / (1 + (dataframe["H"]**2 / (dataframe["K1"] * dataframe["K2"])) + (dataframe["H"] / dataframe["K2"])) #K1c and K2c chosen by the user 
+                        - (self.M0)*(X1/(1+dataframe["H"]/K_X1))
+                        - (self.M0)*(X2/(1+dataframe["H"]/K_X2))
+                        - (self.M0)*(X3/(1+dataframe["H"]/K_X3)))
                 return model - data
 
         elif minimiser_no == 4:
@@ -772,17 +772,17 @@ class OrgAlkTitration():
                 K_X3 = params['K_X3']
    
 
-                model = ((self.V0 + self.Va+ dataframe["m"])*(dataframe["H"]-dataframe["OH"]) 
-                        -((self.V0+self.Va)*H0)
+                model = ((self.M0 + self.Ma+ dataframe["m"])*(dataframe["H"]-dataframe["OH"]) 
+                        -((self.M0+self.Ma)*H0)
                         +(dataframe["m"]*C_NaOH) 
-                        - self.V0 *(BT / (1 + dataframe["H"] / dataframe["KB"])) # optional, but used for all real seawater samples. BT and KB calculated 
-                        - self.V0 * (PT / (1 + dataframe["H"] / dataframe["KP2"]))  # optional, used if PT is above a certain value. PT user supplied, KP2 calculated 
-                        - self.V0 * (SiT / (1 + dataframe["H"] / dataframe["KSi"])) # optional, used if SiT is above a certain value. SiT user supplied, KSi calculated 
-                        - (self.Vb * CTNa) / (1 + (dataframe["H"] / dataframe["K1"]) + (dataframe["K2"] / dataframe["H"])) #K1c and K2c are carbonate system dissociation constants 
-                        - (2 * self.Vb * CTNa) / (1 + (dataframe["H"]**2 / (dataframe["K1"] * dataframe["K2"])) + (dataframe["H"] / dataframe["K2"])) #K1c and K2c chosen by the user 
-                        - (self.V0)*(X1/(1+dataframe["H"]/K_X1))
-                        - (self.V0)*(X2/(1+dataframe["H"]/K_X2))
-                        - (self.V0)*(X3/(1+dataframe["H"]/K_X3)))
+                        - self.M0 *(BT / (1 + dataframe["H"] / dataframe["KB"])) # optional, but used for all real seawater samples. BT and KB calculated 
+                        - self.M0 * (PT / (1 + dataframe["H"] / dataframe["KP2"]))  # optional, used if PT is above a certain value. PT user supplied, KP2 calculated 
+                        - self.M0 * (SiT / (1 + dataframe["H"] / dataframe["KSi"])) # optional, used if SiT is above a certain value. SiT user supplied, KSi calculated 
+                        - (self.Mb * CTNa) / (1 + (dataframe["H"] / dataframe["K1"]) + (dataframe["K2"] / dataframe["H"])) #K1c and K2c are carbonate system dissociation constants 
+                        - (2 * self.Mb * CTNa) / (1 + (dataframe["H"]**2 / (dataframe["K1"] * dataframe["K2"])) + (dataframe["H"] / dataframe["K2"])) #K1c and K2c chosen by the user 
+                        - (self.M0)*(X1/(1+dataframe["H"]/K_X1))
+                        - (self.M0)*(X2/(1+dataframe["H"]/K_X2))
+                        - (self.M0)*(X3/(1+dataframe["H"]/K_X3)))
                 return model - data
 
         params = Parameters()
@@ -804,57 +804,57 @@ class OrgAlkTitration():
         SiT = self.species_concentrations["SiT"]
         CTNa = self.species_concentrations["CTNa"]  
         if minimiser_no == 1:
-            cleaned_dataframe["m_calc_001"] = ( -((self.V0*(cleaned_dataframe["H"]-cleaned_dataframe["OH"]) 
-                                      - self.H0*(self.V0+self.Va)
-                                      - (BT*self.V0)/((cleaned_dataframe["H"]/dataframe["KB"])+1) 
-                                      - (PT*self.V0)/((cleaned_dataframe["H"]/dataframe["KP2"])+1) 
-                                      - (SiT*self.V0)/((cleaned_dataframe["H"]/dataframe["KSi"])+1) 
-                                      - (self.X1*self.V0)/((cleaned_dataframe["H"]/self.K_X1)+1) 
-                                      + self.Va*(cleaned_dataframe["H"]-cleaned_dataframe["OH"]))
+            cleaned_dataframe["m_calc_001"] = ( -((self.M0*(cleaned_dataframe["H"]-cleaned_dataframe["OH"]) 
+                                      - self.H0*(self.M0+self.Ma)
+                                      - (BT*self.M0)/((cleaned_dataframe["H"]/dataframe["KB"])+1) 
+                                      - (PT*self.M0)/((cleaned_dataframe["H"]/dataframe["KP2"])+1) 
+                                      - (SiT*self.M0)/((cleaned_dataframe["H"]/dataframe["KSi"])+1) 
+                                      - (self.X1*self.M0)/((cleaned_dataframe["H"]/self.K_X1)+1) 
+                                      + self.Ma*(cleaned_dataframe["H"]-cleaned_dataframe["OH"]))
                                       / ((2*CTNa)/((cleaned_dataframe["H"]**2/( dataframe["K1"]* dataframe["K2"]))+(cleaned_dataframe["H"]/dataframe["K2"])+1)
                                       + CTNa/((cleaned_dataframe["H"]/ dataframe["K1"])+(dataframe["K2"]/cleaned_dataframe["H"])+1)
                                       - cleaned_dataframe["H"] + cleaned_dataframe["OH"] + self.C_NaOH)) )
                                      
             RMS = np.mean((cleaned_dataframe['m']-cleaned_dataframe["m_calc_001"])**2)
         elif minimiser_no == 2:
-            cleaned_dataframe["m_calc_002"] = ( -((self.V0*(cleaned_dataframe["H"]-cleaned_dataframe["OH"]) 
-                                      - self.H0*(self.V0+self.Va)
-                                      - (BT*self.V0)/((cleaned_dataframe["H"]/dataframe["KB"])+1) 
-                                      - (PT*self.V0)/((cleaned_dataframe["H"]/dataframe["KP2"])+1) 
-                                      - (SiT*self.V0)/((cleaned_dataframe["H"]/dataframe["KSi"])+1) 
-                                      - (self.X1*self.V0)/((cleaned_dataframe["H"]/self.K_X1)+1) 
-                                      - (self.X2*self.V0)/((cleaned_dataframe["H"]/self.K_X2)+1)
-                                      + self.Va*(cleaned_dataframe["H"]-cleaned_dataframe["OH"]))
+            cleaned_dataframe["m_calc_002"] = ( -((self.M0*(cleaned_dataframe["H"]-cleaned_dataframe["OH"]) 
+                                      - self.H0*(self.M0+self.Ma)
+                                      - (BT*self.M0)/((cleaned_dataframe["H"]/dataframe["KB"])+1) 
+                                      - (PT*self.M0)/((cleaned_dataframe["H"]/dataframe["KP2"])+1) 
+                                      - (SiT*self.M0)/((cleaned_dataframe["H"]/dataframe["KSi"])+1) 
+                                      - (self.X1*self.M0)/((cleaned_dataframe["H"]/self.K_X1)+1) 
+                                      - (self.X2*self.M0)/((cleaned_dataframe["H"]/self.K_X2)+1)
+                                      + self.Ma*(cleaned_dataframe["H"]-cleaned_dataframe["OH"]))
                                       / ((2*CTNa)/((cleaned_dataframe["H"]**2/( dataframe["K1"]* dataframe["K2"]))+(cleaned_dataframe["H"]/dataframe["K2"])+1)
                                       + CTNa/((cleaned_dataframe["H"]/ dataframe["K1"])+(dataframe["K2"]/cleaned_dataframe["H"])+1)
                                       - cleaned_dataframe["H"] + cleaned_dataframe["OH"] + self.C_NaOH)) )
                                      
             RMS = np.mean((cleaned_dataframe['m']-cleaned_dataframe["m_calc_002"])**2)
         elif minimiser_no == 3:
-            cleaned_dataframe["m_calc_003"] = ( -((self.V0*(cleaned_dataframe["H"]-cleaned_dataframe["OH"]) 
-                                      - self.H0*(self.V0+self.Va)
-                                      - (BT*self.V0)/((cleaned_dataframe["H"]/dataframe["KB"])+1) 
-                                      - (PT*self.V0)/((cleaned_dataframe["H"]/dataframe["KP2"])+1) 
-                                      - (SiT*self.V0)/((cleaned_dataframe["H"]/dataframe["KSi"])+1) 
-                                      - (self.X1*self.V0)/((cleaned_dataframe["H"]/self.K_X1)+1) 
-                                      - (self.X2*self.V0)/((cleaned_dataframe["H"]/self.K_X2)+1)
-                                      - (self.X3*self.V0)/((cleaned_dataframe["H"]/self.K_X3)+1)
-                                      + self.Va*(cleaned_dataframe["H"]-cleaned_dataframe["OH"]))
+            cleaned_dataframe["m_calc_003"] = ( -((self.M0*(cleaned_dataframe["H"]-cleaned_dataframe["OH"]) 
+                                      - self.H0*(self.M0+self.Ma)
+                                      - (BT*self.M0)/((cleaned_dataframe["H"]/dataframe["KB"])+1) 
+                                      - (PT*self.M0)/((cleaned_dataframe["H"]/dataframe["KP2"])+1) 
+                                      - (SiT*self.M0)/((cleaned_dataframe["H"]/dataframe["KSi"])+1) 
+                                      - (self.X1*self.M0)/((cleaned_dataframe["H"]/self.K_X1)+1) 
+                                      - (self.X2*self.M0)/((cleaned_dataframe["H"]/self.K_X2)+1)
+                                      - (self.X3*self.M0)/((cleaned_dataframe["H"]/self.K_X3)+1)
+                                      + self.Ma*(cleaned_dataframe["H"]-cleaned_dataframe["OH"]))
                                       / ((2*CTNa)/((cleaned_dataframe["H"]**2/( dataframe["K1"]* dataframe["K2"]))+(cleaned_dataframe["H"]/dataframe["K2"])+1)
                                       + CTNa/((cleaned_dataframe["H"]/ dataframe["K1"])+(dataframe["K2"]/cleaned_dataframe["H"])+1)
                                       - cleaned_dataframe["H"] + cleaned_dataframe["OH"] + self.C_NaOH)) )
                                      
             RMS = np.mean((cleaned_dataframe['m']-cleaned_dataframe["m_calc_003"])**2)
         elif minimiser_no == 4:
-            cleaned_dataframe["m_calc_004"] = ( -((self.V0*(cleaned_dataframe["H"]-cleaned_dataframe["OH"]) 
-                                      - self.H0*(self.V0+self.Va)
-                                      - (BT*self.V0)/((cleaned_dataframe["H"]/dataframe["KB"])+1) 
-                                      - (PT*self.V0)/((cleaned_dataframe["H"]/dataframe["KP2"])+1) 
-                                      - (SiT*self.V0)/((cleaned_dataframe["H"]/dataframe["KSi"])+1) 
-                                      - (self.X1*self.V0)/((cleaned_dataframe["H"]/self.K_X1)+1) 
-                                      - (self.X2*self.V0)/((cleaned_dataframe["H"]/self.K_X2)+1)
-                                      - (self.X3*self.V0)/((cleaned_dataframe["H"]/self.K_X3)+1)
-                                      + self.Va*(cleaned_dataframe["H"]-cleaned_dataframe["OH"]))
+            cleaned_dataframe["m_calc_004"] = ( -((self.M0*(cleaned_dataframe["H"]-cleaned_dataframe["OH"]) 
+                                      - self.H0*(self.M0+self.Ma)
+                                      - (BT*self.M0)/((cleaned_dataframe["H"]/dataframe["KB"])+1) 
+                                      - (PT*self.M0)/((cleaned_dataframe["H"]/dataframe["KP2"])+1) 
+                                      - (SiT*self.M0)/((cleaned_dataframe["H"]/dataframe["KSi"])+1) 
+                                      - (self.X1*self.M0)/((cleaned_dataframe["H"]/self.K_X1)+1) 
+                                      - (self.X2*self.M0)/((cleaned_dataframe["H"]/self.K_X2)+1)
+                                      - (self.X3*self.M0)/((cleaned_dataframe["H"]/self.K_X3)+1)
+                                      + self.Ma*(cleaned_dataframe["H"]-cleaned_dataframe["OH"]))
                                       / ((2*CTNa)/((cleaned_dataframe["H"]**2/( dataframe["K1"]* dataframe["K2"]))+(cleaned_dataframe["H"]/dataframe["K2"])+1)
                                       + CTNa/((cleaned_dataframe["H"]/ dataframe["K1"])+(dataframe["K2"]/cleaned_dataframe["H"])+1)
                                       - cleaned_dataframe["H"] + cleaned_dataframe["OH"] + self.C_NaOH)) )
