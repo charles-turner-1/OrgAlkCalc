@@ -1,6 +1,6 @@
 # OrgAlkCalc
 
-This is a package which you can use to compute organic alkalinity from titration: see \url{https://doi.org/10.1016/j.marchem.2023.104234}
+This is a package which you can use to compute organic alkalinity from titration: see [OrgAlkCalc.py: Estimation of organic alkalinity quantities and acid-base properties with proof of concept in Dublin Bay](https://doi.org/10.1016/j.marchem.2023.104234)
 
 ## Usage
 This toolbox contains two basic classes which may be used to perform organic 
